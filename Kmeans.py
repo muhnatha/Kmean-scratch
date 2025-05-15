@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Kmeans:
     def __init__(self, n_clusters=3, max_iters=100, ):
@@ -22,7 +23,7 @@ class Kmeans:
             min_dis = float('inf')
             label = -1
             for idx, centroid in enumerate(centroids):
-                distance = np.linalg.norm(x - centroid, axis=1)
+                distance = np.linalg.norm(x - centroid)
                 if distance < min_dis:
                     min_dis = distance
                     label = idx
@@ -30,7 +31,7 @@ class Kmeans:
             labels.append(label)
         return np.array(labels)
     
-    def update_centroids(self, X, clusters):
+    def update_centroids(self, X, clusters):       
         for i in range(self.n_clusters):
             points = np.array(clusters[i]['points'])
                 
@@ -89,3 +90,26 @@ class Kmeans:
 
             labels.append(label)
         return np.array(labels)
+    
+    def compute_inertia(self, X):
+        inertia = 0
+        for x, label in zip(X, self.labels):
+            center = self.cluster_centers[label]
+            inertia += np.linalg.norm(x - center) ** 2
+        return inertia
+
+    @staticmethod
+    def elbow_method(X, max_k=10):
+        inertias = []
+        for k in range(1, max_k + 1):
+            model = Kmeans(n_clusters=k)
+            model.fit(X)
+            inertia = model.compute_inertia(X)
+            inertias.append(inertia)
+        # Plot the elbow
+        plt.plot(range(1, max_k + 1), inertias, 'bo-')
+        plt.xlabel('Number of Clusters (k)')
+        plt.ylabel('Inertia (WSS)')
+        plt.title('Elbow Method for Optimal k')
+        plt.grid(True)
+        plt.show()
